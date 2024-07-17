@@ -1,4 +1,7 @@
 # .gitignore
 
-# Ignore the .env file
+# Ignore these file
 .env
+API-endpoints.txt
+Schema.png
+Schema.sql
