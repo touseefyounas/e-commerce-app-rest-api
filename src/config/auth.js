@@ -5,6 +5,10 @@ const bcrypt = require('bcrypt');
 
 const pool = require('../config/db');
 
+const getCurrentTimeStamp = () => {
+    return new Date().toISOString();
+}
+
 const userExists = async(email) => {
     const userExist = await pool.query('SELECT * FROM users WHERE email =$1', [email]);
     if (userExist.rows.length>0) {
@@ -21,7 +25,8 @@ const createUser = async (req, res) => {
         try {
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
-            const newUser = await pool.query('INSERT INTO users (password, first_name, last_name, telephone, email) VALUES ($1, $2, $3, $4, $5) RETURNING *', [hashedPassword, first_name, last_name, telephone, email]);
+            const createdAt = getCurrentTimeStamp();
+            const newUser = await pool.query('INSERT INTO users (password, first_name, last_name, telephone, created_at, email) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [hashedPassword, first_name, last_name, telephone, createdAt, email]);
             res.status(201).json(newUser.rows[0]);
         } catch(err) {
             console.log(err.message);
