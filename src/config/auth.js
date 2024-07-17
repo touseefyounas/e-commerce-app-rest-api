@@ -19,8 +19,9 @@ const createUser = async (req, res) => {
     const user = await userExists(email);
     if (!user) {
         try {
-            //const hashedPassword = await bcrypt.hash(password, 10);
-            const newUser = await pool.query('INSERT INTO users (password, first_name, last_name, telephone, email) VALUES ($1, $2, $3, $4, $5) RETURNING *', [password, first_name, last_name, telephone, email]);
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            const newUser = await pool.query('INSERT INTO users (password, first_name, last_name, telephone, email) VALUES ($1, $2, $3, $4, $5) RETURNING *', [hashedPassword, first_name, last_name, telephone, email]);
             res.status(201).json(newUser.rows[0]);
         } catch(err) {
             console.log(err.message);
@@ -37,7 +38,7 @@ passport.use('local', new LocalStrategy({usernameField: 'email', passwordField: 
         if (!user) {
             return done (null, false);
         }
-        const isMatch = password === user.password;
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return done(null, false);
         }
