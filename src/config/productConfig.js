@@ -37,7 +37,7 @@ const getProductById = async (req, res) => {
     const id = req.params.productId;
     try{
     const product = await pool.query('SELECT * FROM product WHERE id = $1', [id]);
-    res.status(200).json({})
+    res.status(200).json(product.rows[0])
     } catch(err) {
         console.log(err.message);
         res.status(500).json({message: 'Server error'});
@@ -46,7 +46,7 @@ const getProductById = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
     try {
-        const products = pool.query('SELECT * FROM product ORDER BY id ASC');
+        const products = await pool.query('SELECT * FROM product ORDER BY id ASC');
         res.status(200).json(products.rows);
     } catch (err) {
         console.log(err.message);
@@ -59,9 +59,9 @@ const updateProduct = async (req, res) => {
     const { name, description, sku, category_id, price, discount_id } = req.vody;
     const modifiedAt = getCurrentTimeStamp();
     try {
-        const updatedProduct = pool.query('UPDATE product SET name=$1, description=$2, sku=$3, category_id=$4, price=$5, discount_id=$6, modified_at=$7 WHERE id=$8 RETURNING *', 
+        const updatedProduct = await pool.query('UPDATE product SET name=$1, description=$2, sku=$3, category_id=$4, price=$5, discount_id=$6, modified_at=$7 WHERE id=$8 RETURNING *', 
         [name, description, sku, category_id, price, discount_id, modifiedAt, id]);
-        res.status(201).json(product.rows);
+        res.status(201).json(updatedProduct.rows);
     } catch (err) {
         console.log(err.message);
         res.status(500).json({message:'Server error'});
@@ -71,7 +71,7 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
     const id = req.params.productId;
     try {
-        const deleteProduct = pool.query('DELETE FROM product WHERE id=$1', [id]);
+        const deleteProduct = await pool.query('DELETE FROM product WHERE id=$1', [id]);
         res.status(200).send(`Product deleted with ID: ${id}`);
     } catch (err) {
         console.log(err.message);

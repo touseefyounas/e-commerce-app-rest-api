@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const passport = require('./config/auth').passport; 
+const store = new session.MemoryStore();
 
 const app = express();
 
@@ -13,7 +14,9 @@ const PORT = process.env.PORT || 3000;
 app.use(session({
     secret: process.env.SESSION_KEY,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store,
+    cookie: {maxAge: 300000000}
   }));
 
 app.use(passport.initialize());

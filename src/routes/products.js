@@ -7,6 +7,8 @@ const {
     deleteProduct
 } = require('../config/productConfig');
 
+const { isAuthenticated } = require('../config/auth');
+
 const router = express.Router();
 
 
