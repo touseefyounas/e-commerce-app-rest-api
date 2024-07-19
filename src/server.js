@@ -8,6 +8,7 @@ const app = express();
 
 const userRouter = require('./routes/users');
 const productRouter = require('./routes/products');
+const cartRouter = require('./routes/userCart');
 
 const PORT = process.env.PORT || 3000;
 
@@ -26,6 +27,7 @@ app.use(express.json());
 
 app.use('/users', userRouter);
 app.use('/products', productRouter);
+app.use('/users/:userId/cart', cartRouter);
 
 app.get('/', (req, res) => {
     res.send('Hello World!');

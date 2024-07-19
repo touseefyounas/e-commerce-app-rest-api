@@ -45,16 +45,16 @@ const addItemToCart = async (req, res) => {
     const { productId, quantity } = req.body;
     const createdAt = getCurrentTimeStamp();
     try {
-    const cart = await pool.query('SELECT id FROM carts WHERE user_id=$1', [userId]);
-    if (cart.rows.length > 0) {
-        const cartId = cart.rows[0].id;
-        const checkItem = await pool.query('SELECT * FROM cart_items WHERE product_id=$1', [productId]);
+        const cart = await pool.query('SELECT id FROM carts WHERE user_id=$1', [userId]);
+        if (cart.rows.length > 0) {
+            const cartId = cart.rows[0].id;
+            const checkItem = await pool.query('SELECT * FROM cart_items WHERE product_id=$1 AND cart_id=$2', [productId, cartId]);
         if (checkItem.rows.length > 0) {
             res.status(400).json({message: 'Item already in the cart'});
         } else {
-        const addItem = await pool.query('INSERT INTO cart_items (product_id, quantity, created_at, cart_id) VALUES ($1, $2, $3, $4) RETURNING *', 
+            const addItem = await pool.query('INSERT INTO cart_items (product_id, quantity, created_at, cart_id) VALUES ($1, $2, $3, $4) RETURNING *', 
             [productId, quantity, createdAt, cartId]);
-        res.status(201).json(addItem.rows[0]);
+            res.status(201).json(addItem.rows[0]);
         }
         } else {
             res.status(404).json({message: 'Cart not found for user'});
@@ -65,11 +65,42 @@ const addItemToCart = async (req, res) => {
     }
 }
 const updateCartItemById = async (req, res) => {
-
+    const userId = req.params.userId;
+    const { productId, quantity } = req.body;
+    const modifiedAt = getCurrentTimeStamp();
+    try {
+        const cart = await pool.query('SELECT id FROM carts WHERE user_id=$1', [userId]);
+        if (cart.rows.length > 0) {
+            const cartId = cart.rows[0].id;
+            const updatedItem = await pool.query('UPDATE cart_items SET quantity =$1, modified_at=$2 WHERE cart_id=$3 AND product_id=$4 RETURNING *',
+                                [quantity, modifiedAt, cartId, productId]);
+            res.status(201).json(updatedItem.rows);
+        } else {
+            res.status(404).json({message: 'Cart not found for user'});
+        }
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).json({message:'Server Error'});
+    }
 }
 
 const deleteCartItemById = async (req, res) => {
-
+    const userId = req.params.userId;
+    const { productId } = req.body;
+    try {
+        const cart = await pool.query('SELECT id FROM carts WHERE user_id=$1', [userId]);
+        if (cart.rows.length > 0) {
+            const cartId = cart.rows[0].id;
+            const deletedItem = await pool.query('DELETE FROM cart_items WHERE cart_id=$1 AND product_id=$2 RETURNING *',
+                                [cartId, productId]);
+            res.status(201).json(deletedItem.rows);
+        } else {
+            res.status(404).json({message: 'Cart not found for user'});
+        }
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).json({message:'Server Error'});
+    }
 }
 
 module.exports = {
