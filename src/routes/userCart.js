@@ -7,9 +7,9 @@ const {
     deleteCartItemById
 } = require('../config/cartConfig');
 
-const router = express.Router()
+const router = express.Router({ mergeParams: true });
 
-router.use(cartCreationByUserId)
+router.use(cartCreationByUserId);
 
 router.get('/', getCart);
 

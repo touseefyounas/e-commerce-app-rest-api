@@ -6,7 +6,7 @@ const getCurrentTimeStamp = () => {
 
 const cartExists = async (userId)=> {
     const cart = await pool.query('SELECT * FROM carts WHERE user_id=$1', [userId]);
-    return cart.rows.length > 0;
+    return cart.rows[0]? true : false;
 }
 
 const cartCreationByUserId = async (req, res, next) => {
@@ -19,7 +19,8 @@ const cartCreationByUserId = async (req, res, next) => {
         const createdAt = getCurrentTimeStamp();
         const cart = await pool.query('INSERT INTO carts (user_id, created_at) VALUES ($1, $2)', 
             [userId, createdAt]);
-        if (cart.rows.length > 0) {
+
+        if (cart.rows[0]) {
             next()
         } else {
             res.status(500).json({ message: 'Failed to create cart' });
@@ -34,7 +35,7 @@ const cartCreationByUserId = async (req, res, next) => {
 const getCart = async (req, res) => {
     const userId = req.params.userId;
 
-    const cart = await pool.query('SELECT ci.*, p.name, p.price FROM cart_items ci INNER JOIN carts c ON ci.cart_id = c.id INNER JOIN products p ON ci.product_id = p.id WHERE c.user_id = $1', 
+    const cart = await pool.query('SELECT ci.*, p.name, p.price FROM cart_items ci INNER JOIN carts c ON ci.cart_id = c.id INNER JOIN product p ON ci.product_id = p.id WHERE c.user_id = $1', 
         [userId]);
     res.status(200).json(cart.rows);
 }
@@ -70,6 +71,7 @@ const updateCartItemById = async (req, res) => {
     const modifiedAt = getCurrentTimeStamp();
     try {
         const cart = await pool.query('SELECT id FROM carts WHERE user_id=$1', [userId]);
+        
         if (cart.rows.length > 0) {
             const cartId = cart.rows[0].id;
             const updatedItem = await pool.query('UPDATE cart_items SET quantity =$1, modified_at=$2 WHERE cart_id=$3 AND product_id=$4 RETURNING *',
