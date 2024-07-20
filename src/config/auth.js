@@ -126,9 +126,12 @@ const deleteUserById = async (req, res) => {
     }
 }
 
-module.exports = { createUser, 
+module.exports = {  
+                    createUser, 
                     passport, 
                     isAuthenticated, 
                     getUserById, 
                     updateUserById, 
-                    deleteUserById};
+                    deleteUserById,
+                    userExists
+                };
