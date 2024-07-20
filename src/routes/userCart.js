@@ -7,6 +7,8 @@ const {
     deleteCartItemById
 } = require('../config/cartConfig');
 
+const { isAuthenticated } = require('../config/auth');
+
 const router = express.Router({ mergeParams: true });
 
 router.use(cartCreationByUserId);

@@ -71,7 +71,7 @@ const updateCartItemById = async (req, res) => {
     const modifiedAt = getCurrentTimeStamp();
     try {
         const cart = await pool.query('SELECT id FROM carts WHERE user_id=$1', [userId]);
-        
+
         if (cart.rows.length > 0) {
             const cartId = cart.rows[0].id;
             const updatedItem = await pool.query('UPDATE cart_items SET quantity =$1, modified_at=$2 WHERE cart_id=$3 AND product_id=$4 RETURNING *',
@@ -110,5 +110,6 @@ module.exports = {
     getCart,
     addItemToCart,
     updateCartItemById,
-    deleteCartItemById
+    deleteCartItemById,
+    cartExists
 };
